@@ -43,7 +43,7 @@ class App {
         
         let index = app.rootnode.CheckBounds(X, Y);
         console.log(index);
-        if (!index && index != 0) {
+        if (!index && index === false) {
             if (this.modal) {
                 document.body.removeChild(this.modal);
                 this.modal = null;
@@ -56,6 +56,7 @@ class App {
             document.body.appendChild(this.modal);
         }
 
+        console.log(index);
         let rect = App.GetPanel(index).element.getBoundingClientRect();
         const axis = App.FindAxis(X, Y, rect.left + (rect.width / 2), rect.top + (rect.height / 2));
 

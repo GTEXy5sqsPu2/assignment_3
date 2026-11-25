@@ -3,6 +3,7 @@
 ## Description
 
 Basic music playing / playlist app, No server.
+Does have bsp style playlist layout (Screen Division).
 
 ## Links
 

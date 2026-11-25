@@ -6,23 +6,87 @@
     <meta name="description" content="Super simple music app">
 
     <link rel="stylesheet" href="./css/styles.css">
-    <script src="./data/songs.js"></script>
+
+    
+    <script src="./data/songs.js" defer></script>
+    <script src="./js/common.js"></script>
+    <script src="./js/panel.js" defer></script>
+    <script src="./js/node.js" defer></script>
     <script src="./js/app.js" defer></script>
+    <script src="./js/seeder.js" defer></script>
 
     <title>Footnotes</title>
 </head>
 <body>
     <header>
-        <h1>Footnotes</h1>
+        <nav>
+            <h1>Footnotes</h1>
+        </nav>
     </header>
-    <aside>
-        <div>
-            <h2>Navigation</h2>
-            <button>+</button>
-        </div>
-    </aside>
     <main>
-        No Windows
+        <aside id="sidenav">
+            <div>
+                <h2>Navigation</h2>
+                <button onclick="app.AddItem()">+</button>
+            </div>
+
+            <ol id="sidenav-list">
+
+            </ol>
+
+            <template id="nav-template">
+                <li>
+                    <h3>Button</h3>
+                    <button id="toggle-btn">show</button>
+                </li>
+            </template>
+        </aside>
+        <template id="panel-template">
+            <div class="panel">
+                <header>
+                    <h3>Name</h3>
+                    <button id="close-btn">Close</button>
+                </header>
+                <div class="panel-content">
+                    Nothing to display
+                </div>
+                <!--<template id="card-template">-->
+                    <div class="card">
+                        <div>
+                            <h2 id="title">Title</h2>
+                            <h4 id="artist">Artist</h4>
+                        </div>
+                        <div>
+                            <h3 id="time">Length</h3>
+                            <h3 id="genre">Genre</h3>
+                        </div>
+                    </div>
+            </div>
+        </template>
+        <template id="node-template">
+            <div class="node">
+
+            </div>
+        </template>
+        <div id="root-node" class="panel">
+            
+        </div>
     </main>
+    <template id="drag-template">
+        <div class="panel" id="drag-window">
+            <header>
+                <h3>Window</h3>
+            </header>
+            On the move
+        </div>
+    </template>
+    <template id="modal-template">
+        <div class="panel" id="modal">
+            <header>
+                <h3>Window</h3>
+            </header>
+            Can be placed here
+        </div>
+    </template>
 </body>
 </html>

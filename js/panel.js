@@ -1,30 +1,57 @@
 class Panel {
-    constructor(Id) {
-        this.Id = Id;
-        this.shown = false;
-        this.data = [];
+    constructor(Data) {
+        this.songs = [];
+        if (Data == null) {
+            this.Id = Id.GetId('panel');
+            this.shown = true;
+            return;
+        }
+        this.Id = Data.Id;
+        this.shown = Data.shown;
+        
+        this.AddRawSongs(Data.songs);
     }
 
+    static GetPanel(Id) {
+        return app.playlists.find(x => x.Id === Id);
+    }
+
+    static SetPanel(Id, Panel) {
+        let index = app.playlists.findIndex(x => x.Id === Id);
+        app.playlists[index] = Panel;
+    }
+
+
     static Toggle(Id) {
-        App.GetPanel(Id).Toggle();
+        Panel.GetPanel(Id).Toggle();
     }
 
     static StartDrag(Id, e) {
-        App.GetPanel(Id).StartDrag(e);
+        Panel.GetPanel(Id).StartDrag(e);
     }
     
     static Drag(Id, e) {
-        App.GetPanel(Id).Drag(e);
+        Panel.GetPanel(Id).Drag(e);
     }
     
     static StopDrag(Id, e) {
-        App.GetPanel(Id).StopDrag(e);
+        Panel.GetPanel(Id).StopDrag(e);
+    }
+
+    AddRawSongs(Songs) {
+        Songs.forEach(song => {
+            Id.GetId('song'); //discard, Will be an issue later.
+            this.songs.push(new Song(song));
+        });
+    }
+
+    AddSong(Song) {
+        this.songs.push(Song);
     }
 
     Toggle() {
         this.shown = !this.shown;
-        this.Draw();
-        App.RecheckVisibility();
+        App.Draw();
     }
 
     StartDrag(e) {
@@ -57,9 +84,9 @@ class Panel {
         App.SetModal(e.clientX, e.clientY, this.Id); //X, Y, Id
     }
 
-    Draw(Parent = null) {
+    Draw(X, Y, Width, Height, Parent = null) {
         if (Parent) {
-            this.element = Common.CloneTemplate("#panel-template", {"#close-btn": {"onclick": () => { Panel.Toggle(this.Id); }}, "header": {"onmousedown": (e) => { Panel.StartDrag(this.Id, e); }}});
+            this.element = Common.CloneTemplate("#panel-template", {"header": {"onmousedown": (e) => { Panel.StartDrag(this.Id, e); }}});
             Parent.appendChild(this.element);
 
             this.sideelement = Common.CloneTemplate("#nav-template", {"#toggle-btn": {"onclick": () => { Panel.Toggle(this.Id); }}});
@@ -67,10 +94,25 @@ class Panel {
         }
 
         if (!this.element) 
-            return;
+            return false;
 
-        this.element.style.display = this.shown ? "none" : "block";
+        if (this.shown)
+            Common.SetSizeAndPos(this.element, X, Y, Width, Height);
+
+        let panelcontent = this.element.querySelector("#panel-content");
+        if (this.songs.length)
+            panelcontent.innerText = "";
+
+        for (let index = 0; index < this.songs.length; index++) {
+            let song = this.songs[index];
+
+            panelcontent.appendChild(song.GetTemplate(this.Id));
+
+            this.songs[index] = song;
+        }
+
+        this.element.style.display = this.shown ? "flex" : "none";
+        return this.shown;
     }
-
 }
 

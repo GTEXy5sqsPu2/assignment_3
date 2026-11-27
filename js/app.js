@@ -4,33 +4,38 @@ const sidenavtemplate = document.querySelector("#nav-template");
 
 class App {
     constructor() {
-        this.items = [];
-        this.rootnode = new Node();
-        this.incrementor = 0;
+        //0 Construct
+        this.registry = new Registry();
+
+        //1. Load
+        this.registry.Load();
+
+        Id.Load();
+
+        this.playlists = [];
+
+        const playlistsjson = JSON.parse(localStorage.getItem('playlists'));
+        if (playlistsjson) playlistsjson.forEach(playlistjson => {
+            let playlist = new Panel(playlistjson);
+            this.playlists.push(playlist);
+        });
+
+        const layoutjson = JSON.parse(localStorage.getItem('layout'));
+
+        this.rootnode = new Node(layoutjson);
         this.modal = null;
     }
 
     AddItem() {
-        this.items.push(new Panel(this.incrementor));
-        this.rootnode.AddChild(this.incrementor);
-        this.incrementor ++;
+        let panel = new Panel();
+        this.playlists.push(panel);
+        this.rootnode.AddChild(panel.Id);
 
         this.Draw();
     }
 
-    static GetPanel(Id) {
-        return app.items.find(x => x.Id === Id);
-    }
-
-    static SetPanelData(Id, Data) {
-        let index = app.items.indexOf(this.GetPanel(Id));
-        app.items[index].data;
-        app.items[index].Draw();
-
-    }
-
-    static GetPanelData(Id) {
-        return this.GetPanel().data;
+    static Draw() {
+        app.Draw();
     }
 
     static ShowFakeModal(X, Y) {
@@ -42,7 +47,6 @@ class App {
         }
         
         let index = app.rootnode.CheckBounds(X, Y);
-        console.log(index);
         if (!index && index === false) {
             if (this.modal) {
                 document.body.removeChild(this.modal);
@@ -56,8 +60,7 @@ class App {
             document.body.appendChild(this.modal);
         }
 
-        console.log(index);
-        let rect = App.GetPanel(index).element.getBoundingClientRect();
+        let rect = Panel.GetPanel(index).element.getBoundingClientRect();
         const axis = App.FindAxis(X, Y, rect.left + (rect.width / 2), rect.top + (rect.height / 2));
 
         switch (axis) {
@@ -86,8 +89,6 @@ class App {
                 this.modal.style.top = rect.top + "px";
                 break;
         }
-
-        //console.log(index, axis, this.modal.style.width, this.modal.style.height);
     }
 
     static SetModal(X, Y, Origin) {
@@ -102,7 +103,6 @@ class App {
 
         //1. Transfer
 
-        console.log(X, Y, Origin, index);
         app.rootnode.SetModal(X, Y, Origin, index);
 
         //2. Clean
@@ -115,24 +115,23 @@ class App {
 
     }
 
-    static RecheckVisibility() {
-        app.rootnode.RecheckVisibility();
-    }
-
     //On draw everything is cleaned & redrawn. Data stays the same but ui completely redraws. Yes a region based reload would be faster but for this simple app this is enough.
     Draw() {
         Common.DestroyChildren(rootnode);
         Common.DestroyChildren(sidenavlist);
 
-        /*this.items.forEach(child => {
-            child.Draw(rootnode);
-        });*/
-
         //Change to X/Y BSP splitting.
-        this.rootnode.Draw(rootnode);
+        //Tired of css overflow. So i am deciding.
+        const rect = document.querySelector("#root-node").getBoundingClientRect();
+        let Width = rootnode.offsetWidth;
+        let Height = rootnode.offsetHeight;
+        let X = rect.left;
+        let Y = rect.top;
 
+        this.rootnode.Draw(X, Y, Width, Height, rootnode);
 
-        console.log( JSON.stringify(this.rootnode, null, 2) );
+        localStorage.setItem('layout', JSON.stringify(this.rootnode, null, 2));
+        localStorage.setItem('playlists', JSON.stringify(this.playlists, null, 2));
     }
 
     static FindAxis(X, Y, PX, PY) {
@@ -152,4 +151,6 @@ class App {
     }
 }
 
-let app = new App();
+window.addEventListener('resize', function(event) {
+    app.Draw();
+}, true);

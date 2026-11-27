@@ -28,12 +28,13 @@ body {
     background-color: var(--base-100);
     color: var(--base-text);
 
-    height: 100vh;
+    height: 100dvh;
     width: 100%;
 
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
+    overflow: hidden;
 }
 
 body > header {
@@ -49,11 +50,15 @@ body > main {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+
+    overflow: hidden;
 }
 
 #sidenav {
     height: 100%;
-    width: 300px;    
+    width: 300px;  
+    
+    overflow-y: auto;
 
     background-color: var(--base-200);
 }
@@ -87,17 +92,11 @@ body > main {
     padding: 8px;
 }
 
-body > main > div {
-    height: 100%;
-    min-width: 400px;
-
-    flex: 1;
-}
-
 .panel {
+
     display: flex;
-    flex-wrap: nowrap;
     flex-direction: column;
+    flex-wrap: nowrap;
     
     width: 100%;
     height: 100%;
@@ -107,15 +106,15 @@ body > main > div {
     border-radius: 5px;
 
     & > header {
-        width: 100%;
         height: 40px;
+        width: 100%;
 
         background-color: var(--base-300);
 
         display: flex;
         flex-direction: row;
         justify-content: space-between; 
-        align-items: center;       
+        align-items: center;   
     }
 
     & > header > * {
@@ -129,7 +128,6 @@ body > main > div {
 
     display: flex;
     flex-wrap: nowrap;
-    gap: 10px;
 }
 
 #drag-window {
@@ -149,6 +147,10 @@ body > main > div {
     }
 }
 
+#root-node {
+    flex: 1;
+}
+
 #modal {
     position: absolute;
 
@@ -161,8 +163,23 @@ body > main > div {
     }
 }
 
-.panel-content > *:nth-child(2) {
-    background-color: var(--base-300);
+#panel-content {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#panel-content > * {
+    flex-shrink: 0;
+}
+
+#panel-content > *:nth-child(odd) {
+    background-color: var(--base-200);
 }
 
 .card {
@@ -179,8 +196,11 @@ body > main > div {
         justify-content: space-between;
     }
 
-    & > div:first > * {
+    & > div:first-child > * {
         text-align: left;
     }
 
+    & > div:last-child > * {
+        text-align: right;
+    }
 }

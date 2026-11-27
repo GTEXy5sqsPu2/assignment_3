@@ -1,9 +1,23 @@
 class Node {
-    constructor(horizontal = true) {
-        //Either horizontal or vertical
-        this.horizontal = horizontal;
+    constructor(horizontal)  { //todo: change variable naming and usage
+        if (horizontal == null) horizontal = false;
         this.children = [];
         this.element = null;
+
+        if (typeof(horizontal) == 'object') {
+            this.horizontal = horizontal.horizontal;
+            
+            horizontal.children.forEach((child) => {
+                if (typeof(child) == 'number') {
+                    this.children.push(child);
+                } else {
+                    this.children.push(new Node(child));
+                }
+            });
+        } else {
+            //Either horizontal or vertical
+            this.horizontal = horizontal;
+        }
     }
 
     //Either add index or node
@@ -20,21 +34,49 @@ class Node {
         }
     }
 
-    Draw(parent) {
-        let direction = this.horizontal ? "row" : "column";
+    Draw(X, Y, Width, Height, parent) {
+        if (this.horizontal) Width /= this.CountShown();
+        else Height /= this.CountShown();
 
-        this.element = Common.CloneTemplate("#node-template", { "": {"style.flex-direction": direction }});
+        this.element = Common.CloneTemplate("#node-template");
         parent.appendChild(this.element);
+        
+        let hasvisiblechildren = false;
+        for (let index = 0; index < this.children.length; index++) {
+            const child = this.children[index];
+            
+            let wasshown = false;
 
-        this.children.forEach(child => {
             if (typeof(child) == 'number')
             {
-                App.GetPanel(child).Draw(this.element);
+                if (Panel.GetPanel(child).Draw(X, Y, Width, Height, this.element)) wasshown = true;
             } else {
                 //Assume another node because recursive.
-                child.Draw(this.element);
+                if (child.Draw(X, Y, Width, Height, this.element)) wasshown = true;
+            }
+
+            if (wasshown) {
+                if (this.horizontal) X += Width;
+                else Y += Height;
+                hasvisiblechildren = true;
+            }
+        }
+
+        return hasvisiblechildren;
+    }
+
+    CountShown() {
+        let count = 0;
+
+        this.children.forEach((child) => {
+            if (typeof(child) == 'number') {
+                if (Panel.GetPanel(child).shown) count++;
+            } else {
+                if (child.CountShown()) count++;
             }
         });
+
+        return count;
     }
 
     CheckBounds(X, Y) {
@@ -50,7 +92,7 @@ class Node {
             const child = this.children[index];
             
             if (typeof(child) == 'number') {
-                let childrect = App.GetPanel(child).element.getBoundingClientRect();
+                let childrect = Panel.GetPanel(child).element.getBoundingClientRect();
                 if (X < childrect.right && X > childrect.left &&
                     Y < childrect.bottom && Y > childrect.top) {
                     return child; //Number found. Send Back.
@@ -69,7 +111,7 @@ class Node {
             let child = this.children[index];
 
             if (typeof(child) == 'number') {
-                if (App.GetPanel(child).element.style.display == "none")
+                if (Panel.GetPanel(child).element.style.display == "none")
                     continue;
             } else {
                 child.RecheckVisibility();
@@ -89,11 +131,9 @@ class Node {
         if (Origin == Index)
             return; //Never
 
-        console.log("H1");
         for (let childindex = 0; childindex < this.children.length; childindex++) {
             const child = this.children[childindex];
 
-            console.log(child);
 
             if (typeof(child) == 'number') {
                 //Check Id
@@ -101,13 +141,13 @@ class Node {
                     //Cleanup
                     this.children.splice(childindex, 1);
                     childindex -= 1;
-                    console.log("Cleanup");
+
                 }
-                console.log(child, Index);
+
                 if (child == Index)
                 {
                     //We Found
-                    const rect = App.GetPanel(child).element.getBoundingClientRect();
+                    const rect = Panel.GetPanel(child).element.getBoundingClientRect();
                     const axis = App.FindAxis(X, Y, rect.left + (rect.width / 2), rect.top + (rect.height / 2));
                     
                     let newnode = new Node((axis == "top" || axis == "bottom") ? false : true);
@@ -116,14 +156,10 @@ class Node {
                     newnode.AddChild(Index);
                     newnode.children.splice((axis == "top" || axis == "left") ? 0 : 1, 0, Origin);
 
-                    console.log(newnode.children.length);
-
                     this.children[childindex] = newnode;
-                    console.log("Gone");
                 }
             } else {
                 //Recursive
-                console.log("Recurse");
                 child.SetModal(X, Y, Origin, Index);
                 this.children[childindex] = child;
             }

@@ -36,4 +36,18 @@ class Common {
 
         return Clone;
     }
+
+    static ConvertSecondsToString(Number) {
+        let seconds = Number % 60;
+        let minutes = Math.floor(Number / 60);
+        return minutes + ":" + seconds;
+    }
+
+    static SetSizeAndPos(Element, X, Y, Width, Height) {
+        Element.style.position = "absolute";
+        Element.style.left = X + "px";
+        Element.style.top = Y + "px";
+        Element.style.width = Width + "px";
+        Element.style.height = Height + "px"; 
+    }
 }
